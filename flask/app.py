@@ -2,12 +2,12 @@
 
 import flask
 from flask import Flask, send_from_directory, request
-import sched, subprocess
+import os, threading, subprocess
 
+pwd = os.environ.get("PASSWORD")
 app = Flask(__name__)
 process = None
-evt = None
-s = sched.scheduler();
+timer = None
 
 def render_template(page, **kwargs):
     return flask.make_response(flask.render_template(page, **kwargs))
@@ -19,21 +19,28 @@ def root():
 
 @app.route("/start", methods=["POST"])
 def start():
-    global process, evt
+    password = request.form.get("password");
+    if pwd is not None and password != pwd:
+        return flask.make_response("Wrong password", 401)
+    global process, timer
     if process is not None:
-        cancelevt()
+        canceltimer()
         res = "Server stop timeout reset"
     else:
         process = subprocess.Popen(["./wolnas"])
         res = "Server started"
-    evt = s.enter(3 * 60 * 60, 0, abort)
+    timer = threading.Timer(3 * 60 * 60, abort)
+    timer.start()
     return res
 
 @app.route("/stop", methods=["POST"])
 def stop():
-    global process, evt
-    if evt is not None:
-        cancelevt()
+    password = request.form.get("password");
+    if pwd is not None and password != pwd:
+        return flask.make_response("Wrong password", 401)
+    global process, timer
+    if timer is not None:
+        canceltimer()
     if process is None:
         return flask.make_response("Server not running", 400)
     abort()
@@ -50,8 +57,8 @@ def abort():
         p.kill()
     p.wait(5)
 
-def cancelevt():
-    global evt
-    s.cancel(evt)
-    evt = None
+def canceltimer():
+    global timer
+    timer.cancel()
+    timer = None
 

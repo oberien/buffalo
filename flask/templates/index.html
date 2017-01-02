@@ -1,0 +1,27 @@
+{% extends "_base.html" %}
+
+{% block content %}
+<h1> Buffalo Starter </h1>
+<input id="start" type="button" value="Start"><br/>
+<input id="stop" type="button" value="Stop"><br/>
+<div id="res"></div>
+<script>
+'use strict';
+
+document.getElementById("start").onclick = () => request("start");
+document.getElementById("stop").onclick = () => request("stop");
+
+function request(page) {
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", "/" + page);
+  xhr.onload = () => {
+    const res = document.getElementById("res");
+    const line = document.createElement("p");
+    line.innerText = xhr.responseText;
+    res.appendChild(line);
+  }
+  xhr.send();
+}
+</script>
+{% endblock %}
+

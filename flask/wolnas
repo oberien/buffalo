@@ -1,0 +1,8 @@
+#!/bin/sh
+wakeonlan -i 192.168.178.34 -p 9 10:6F:3F:E4:56:C0
+wakeonlan -i 192.168.178.34 -p 9 10:6F:3F:E4:56:C0
+while true
+do
+ 	wakeonlan -i 192.168.178.34 -p 9 10:6F:3F:E4:56:C0
+	sleep 60
+done
